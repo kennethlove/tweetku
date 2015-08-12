@@ -1,16 +1,19 @@
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import csv
-from itertools import filterfalse
+import itertools
+import random
 import re
 
 word_syllables = re.compile(
     r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
 )
 
+Word = namedtuple('Word', ('word', 'syllables'))
+
 
 def build_csv(corpus):
-    for line in filterfalse(lambda x: x.startswith(';;;'),
-                            open(corpus, 'r', encoding='utf-8')):
+    for line in itertools.filterfalse(lambda x: x.startswith(';;;'),
+                                      open(corpus, 'r', encoding='utf-8')):
         match = word_syllables.match(line)
         if match and len(match.group('syllables').split()) < 8:
             yield match.group('word'), len(match.group('syllables').split())
@@ -25,8 +28,18 @@ def build_dict(csvfile):
     reader = csv.reader(open(csvfile, 'r', encoding='utf-8'))
     word_dict = defaultdict(list)
     for word, syl in reader:
-        word_dict[int(syl)].append(word)
+        word_dict[int(syl)].append(Word(word, int(syl)))
     return word_dict
 
 words = build_dict('words.csv')
 
+
+def get_line(syllables):
+    total = 0
+    order = []
+    while total < syllables:
+        num = random.randint(1, syllables-total)
+        order.append(num)
+        total += num
+    line = map(lambda l: random.choice(words[l]), order)
+    return list(line)

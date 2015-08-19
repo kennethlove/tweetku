@@ -2,7 +2,7 @@ from utils import get_line
 
 
 class Poem:
-    structure = None
+    structure = ()
 
     def __init__(self):
         self.lines = []

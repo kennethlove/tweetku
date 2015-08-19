@@ -8,7 +8,8 @@ word_syllables = re.compile(
     r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
 )
 
-Word = namedtuple('Word', ('word', 'syllables'))
+class Word(str):
+    syllables = 0
 
 
 def build_csv(corpus):
@@ -28,7 +29,9 @@ def build_dict(csvfile):
     reader = csv.reader(open(csvfile, 'r', encoding='utf-8'))
     word_dict = defaultdict(list)
     for word, syl in reader:
-        word_dict[int(syl)].append(Word(word, int(syl)))
+        word = Word(word)
+        word.syllables = int(syl)
+        word_dict[int(syl)].append(word)
     return word_dict
 
 words = build_dict('words.csv')

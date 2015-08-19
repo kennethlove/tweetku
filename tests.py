@@ -7,3 +7,8 @@ def test_has_words():
 def test_get_line():
     line = utils.get_line(3)
     assert sum([word.syllables for word in line]) == 3
+
+
+def test_assemble_line():
+    line = utils.get_line(3)
+    assert ' '.join(line)

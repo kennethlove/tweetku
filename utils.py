@@ -8,6 +8,7 @@ word_syllables = re.compile(
     r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
 )
 
+
 class Word(str):
     syllables = 0
 
@@ -33,6 +34,7 @@ def build_dict(csvfile):
         word.syllables = int(syl)
         word_dict[int(syl)].append(word)
     return word_dict
+
 
 words = build_dict('words.csv')
 

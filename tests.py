@@ -1,3 +1,4 @@
+import poems
 import utils
 
 def test_has_words():
@@ -12,3 +13,8 @@ def test_get_line():
 def test_assemble_line():
     line = utils.get_line(3)
     assert ' '.join(line)
+
+
+def test_build_haiku():
+    haiku = poems.Haiku()
+    assert len(haiku.lines) == 3

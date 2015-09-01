@@ -1,6 +1,5 @@
 import collections
 import pickle
-import csv
 import itertools
 import os
 import random
@@ -14,10 +13,6 @@ from nltk.corpus import wordnet
 word_syllables = re.compile(
     r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
 )
-
-
-class Word(str):
-    syllables = 0
 
 
 def build_syllable_pairs(corpus):
@@ -87,17 +82,26 @@ def generate_text_files():
     return syllables, gutenberg, brown
 
 
+def constrained_sum_sample_pos(num_words, syllables):
+    dividers = sorted(random.sample(range(1, syllables), num_words-1))
+    return [a - b for a, b in zip(dividers+[syllables], [0]+dividers)]
+
+
 def get_line(syllables):
     texts = generate_text_files()
-    total = 0
-    syllable_counts = []
-    while total < syllables:
-        num = random.randint(1, syllables-total)
-        syllable_counts.append(num)
-        total += num
+    num_words = random.randint(1, syllables-2)
+    if num_words == 1 and syllables > 5:
+        num_words = random.randint(1, 2)
+
+    syllable_counts = constrained_sum_sample_pos(num_words, syllables)
+
     chosen_words = []
     for syllable in syllable_counts:
-        corpus = random.choice(texts)
+        corpus = random.randint(1, 2)
+        if syllable > 1 and corpus == 2:
+            corpus = random.choice(texts[1:])
+        else:
+            corpus = random.choice(texts)
         while syllable not in corpus:
             corpus = random.choice(texts)
         chosen_words.append(random.choice(corpus[syllable]))

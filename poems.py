@@ -1,3 +1,4 @@
+from itertools import chain
 from utils import get_line
 
 
@@ -8,7 +9,11 @@ class Poem:
         self.lines = []
 
         for line in self.structure:
-            self.lines.append(' '.join(get_line(line)))
+            output = []
+            random_line = get_line(line)
+            for bit in random_line:
+                output.append(' '.join(bit) if isinstance(bit, list) else bit)
+            self.lines.append(' '.join(output))
 
     def __str__(self):
         return '\n'.join([line.title() for line in self.lines])

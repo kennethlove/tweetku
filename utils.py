@@ -1,10 +1,15 @@
-from collections import defaultdict
+import collections
+import pickle
 import csv
 import itertools
+import os
 import random
 import re
 
+import nltk.collocations
+import nltk.corpus
 from nltk.corpus import wordnet
+
 
 word_syllables = re.compile(
     r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
@@ -15,7 +20,7 @@ class Word(str):
     syllables = 0
 
 
-def build_csv(corpus):
+def build_syllable_pairs(corpus):
     for line in itertools.filterfalse(lambda x: x.startswith(';;;'),
                                       open(corpus, 'r', encoding='utf-8')):
         match = word_syllables.match(line)
@@ -23,33 +28,78 @@ def build_csv(corpus):
             len(match.group('syllables').split()) < 8,
             wordnet.synsets(match.group('word'))
         ]):
-            yield match.group('word'), len(match.group('syllables').split())
+            yield (len(match.group('syllables').split()),
+                   match.group('word').lower())
 
 
-def build_dict(csvfile):
-    reader = csv.reader(open(csvfile, 'r', encoding='utf-8'))
-    word_dict = defaultdict(list)
-    for word, syl in reader:
-        word = Word(word)
-        word.syllables = int(syl)
-        word_dict[int(syl)].append(word)
-    return word_dict
+def find_bigrams(corpus):
+    bgm = nltk.collocations.BigramAssocMeasures()
+    finder = nltk.collocations.BigramCollocationFinder.from_words(corpus)
+    finder.apply_freq_filter(3)  # must be found at least 3 times
+    bigrams = finder.nbest(bgm.pmi, 10000)
+    for first, second in bigrams:
+        if first.isalpha() and second.isalpha():
+            yield first, second
+
+
+def bigrams_to_syllables(syllables, bigrams):
+    output = collections.defaultdict(list)
+    for first, second in bigrams:
+        first = first.lower()
+        second = second.lower()
+
+        found_words = []
+        total = 0
+        for word in (first, second):
+            count = [k for k, v in syllables.items() if word in v]
+            if count:
+                total += count[0]
+                found_words.append(word)
+        if len(found_words) == 2 and total <= 7:
+            output[total].append(found_words)
+    return output
+
+
+def generate_text_files():
+    if not os.path.exists('syllables.pickle'):
+        syllables = collections.defaultdict(list)
+        for length, word in build_syllable_pairs('cmudict.txt'):
+            syllables[length].append(word)
+        pickle.dump(syllables, open('syllables.pickle', 'wb'))
+    else:
+        syllables = pickle.load(open('syllables.pickle', 'rb'))
+    if not os.path.exists('gutenberg.pickle'):
+        gutenberg = bigrams_to_syllables(
+            syllables,
+            find_bigrams(nltk.corpus.gutenberg.words())
+        )
+        pickle.dump(gutenberg, open('gutenberg.pickle', 'wb'))
+    else:
+        gutenberg = pickle.load(open('gutenberg.pickle', 'rb'))
+    if not os.path.exists('brown.pickle'):
+        brown = bigrams_to_syllables(
+            syllables,
+            find_bigrams(nltk.corpus.brown.words())
+        )
+        pickle.dump(brown, open('brown.pickle', 'wb'))
+    else:
+        brown = pickle.load(open('brown.pickle', 'rb'))
+    return syllables, gutenberg, brown
 
 
 def get_line(syllables):
-    words = build_dict('words.csv')
+    texts = generate_text_files()
     total = 0
-    order = []
+    syllable_counts = []
     while total < syllables:
         num = random.randint(1, syllables-total)
-        order.append(num)
+        syllable_counts.append(num)
         total += num
-    line = map(lambda l: random.choice(words[l]), order)
-    return list(line)
-
-
-if __name__ == '__main__':
-    with open('words.csv', 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(build_csv('dict.txt'))
+    chosen_words = []
+    for syllable in syllable_counts:
+        corpus = random.choice(texts)
+        while syllable not in corpus:
+            corpus = random.choice(texts)
+        chosen_words.append(random.choice(corpus[syllable]))
+    return chosen_words
 

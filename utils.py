@@ -19,10 +19,10 @@ def build_syllable_pairs(corpus):
     for line in itertools.filterfalse(lambda x: x.startswith(';;;'),
                                       open(corpus, 'r', encoding='utf-8')):
         match = word_syllables.match(line)
-        if match and all([
-            len(match.group('syllables').split()) < 8,
+        if (match and
+            len(match.group('syllables').split()) < 8 and
             wordnet.synsets(match.group('word'))
-        ]):
+        ):
             yield (len(match.group('syllables').split()),
                    match.group('word').lower())
 

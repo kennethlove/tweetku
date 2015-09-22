@@ -1,15 +1,21 @@
+import os
 import random
 
 from twitter import *
 
 from poems import Haiku
 
+access_token = os.environ.get('twitter_access_token')
+access_secret = os.environ.get('twitter_access_secret')
+consumer_key = os.environ.get('twitter_consumer_key')
+consumer_secret = os.environ.get('twitter_consumer_secret')
+
 twitter = Twitter(
     auth=OAuth(
-        "3331240092-1qKSOSLccsvU7wdwKqzrGH7MOHEXfZCrb9O0mOh",
-        "Pp8pLlaEYp0Nj6ybwLVN6mDXjsXC2xtGVoPZtivCtiGLM",
-        "5KQSckXJITX5e0USoRcxK7gjG",
-        "trClWvx6mC9ihGj4FXxaVHPuyWrhXekszDlqpJAj3EKT17BNHa",
+        access_token,
+        access_secret,
+        consumer_key,
+        consumer_secret
     )
 )
 

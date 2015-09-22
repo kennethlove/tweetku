@@ -16,3 +16,12 @@ def test_poem_string():
     haiku = poems.Haiku()
     haiku.lines = ['ABCDE', 'ABCDEFG', 'ABCDE']
     assert str(haiku) == '\n'.join([l.title() for l in haiku.lines])
+
+
+def test_generate_text_files():
+    syllables, gutenberg, brown = utils.generate_text_files()
+assert all([
+    isinstance(syllables, dict),
+    isinstance(gutenberg, dict),
+    isinstance(brown, dict)
+])

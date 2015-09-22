@@ -13,7 +13,7 @@ twitter = Twitter(
     )
 )
 
-def post():
+def post():  # pragma: no cover
     poem = Haiku()
     print(poem)
     """

@@ -19,16 +19,11 @@ twitter = Twitter(
     )
 )
 
-def post():  # pragma: no cover
+def post():
     poem = Haiku()
+    #twitter.statuses.update(status=poem)
     print(poem)
-    """
-    twitter.statuses.update(
-        status=poem
-    )
-    """
-
 
 if __name__ == '__main__':
-    if not random.randint(3, 3) % 3:
+    if random.randint(3, 3) % 3 == 0:
         post()

@@ -1,6 +1,5 @@
 from utils import get_line
 
-
 class Poem:
     structure = ()
 
@@ -19,4 +18,4 @@ class Poem:
 
 
 class Haiku(Poem):
-    structure = [5, 7, 5]
+    structure = (5, 7, 5)

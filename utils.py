@@ -1,6 +1,6 @@
 import collections
-import pickle
 import itertools
+import pickle
 import os
 import random
 import re
@@ -9,28 +9,29 @@ import nltk.collocations
 import nltk.corpus
 from nltk.corpus import wordnet
 
-
 word_syllables = re.compile(
-    r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$',
+    r'^(?P<word>[-\w]+)\s{2}(?P<syllables>(\w+\d?\s?)+)$'
 )
 
 
 def build_syllable_pairs(corpus):
-    for line in itertools.filterfalse(lambda x: x.startswith(';;;'),
-                                      open(corpus, 'r', encoding='utf-8')):
+    for line in itertools.filterfalse(
+            lambda x: x.startswith(';;;'),
+            open(corpus, 'r', encoding='utf-8')):
         match = word_syllables.match(line)
         if (match and
             len(match.group('syllables').split()) < 8 and
             wordnet.synsets(match.group('word'))
         ):
-            yield (len(match.group('syllables').split()),
-                   match.group('word').lower())
+            yield (
+                (len(match.group('syllables').split())),
+                match.group('word').lower())
 
 
 def find_bigrams(corpus):
     bgm = nltk.collocations.BigramAssocMeasures()
     finder = nltk.collocations.BigramCollocationFinder.from_words(corpus)
-    finder.apply_freq_filter(3)  # must be found at least 3 times
+    finder.apply_freq_filter(3)
     bigrams = finder.nbest(bgm.pmi, 10000)
     for first, second in bigrams:
         if first.isalpha() and second.isalpha():
@@ -50,9 +51,9 @@ def bigrams_to_syllables(syllables, bigrams):
             if count:
                 total += count[0]
                 found_words.append(word)
-        if len(found_words) == 2 and total <= 7:
+        if len(found_words) == 2 and total < 8:
             output[total].append(found_words)
-    return output
+        return output
 
 
 def generate_text_files():
@@ -90,6 +91,7 @@ def constrained_sum_sample_pos(num_words, syllables):
 def get_line(syllables):
     texts = generate_text_files()
     num_words = random.randint(1, syllables-2)
+
     if num_words == 1 and syllables > 5:
         num_words = random.randint(1, 2)
 
@@ -106,4 +108,3 @@ def get_line(syllables):
             corpus = random.choice(texts)
         chosen_words.append(random.choice(corpus[syllable]))
     return chosen_words
-

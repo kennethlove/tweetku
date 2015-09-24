@@ -90,7 +90,7 @@ def constrained_sum_sample_pos(num_words, syllables):
 
 def get_line(syllables):
     texts = generate_text_files()
-    num_words = random.randint(1, syllables-2)
+    num_words = random.randint(1, syllables)
 
     if num_words == 1 and syllables > 5:
         num_words = random.randint(1, 2)
